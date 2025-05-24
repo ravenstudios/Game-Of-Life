@@ -1,13 +1,19 @@
 import pygame
 import random
 from collections import deque
+# import the newly made grid class
+import grid
+
+from constants import *
+# moved vars to constants.py, if we import all(*) we can just call them by name in ths file
+
+# obj name = importded package.__init__class name
+grid = grid.Grid()
+
 
 pygame.init()
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREY = (128, 128, 128)
-YELLOW = (255, 255, 0)
+
 DESKTOP_W, DESKTOP_H = pygame.display.get_desktop_sizes()[0]
 
 def switch_display(fullscreen: bool):
@@ -18,11 +24,11 @@ def switch_display(fullscreen: bool):
 
     if fullscreen:
         WIDTH, HEIGHT = DESKTOP_W, DESKTOP_H
-        flags = pygame.FULLSCREEN 
+        flags = pygame.FULLSCREEN
     else:
         WIDTH, HEIGHT = 1200, 1200
         flags = 0
-        
+
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
 
@@ -38,7 +44,7 @@ except AttributeError:
     print("Display info not available, using default size.")
     WIDTH, HEIGHT = 1200, 1200
 
-TILE_SIZE = 5
+
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
 
@@ -65,16 +71,16 @@ def gen (num):
 
 
 
-def draw_grid(positions):
-    for position in positions:
-        col, row = position
-        top_left = (col * TILE_SIZE, row * TILE_SIZE)
-        pygame.draw.rect(screen, YELLOW, (*top_left, TILE_SIZE, TILE_SIZE))
+# def draw_grid(positions):
+#     for position in positions:
+#         col, row = position
+#         top_left = (col * TILE_SIZE, row * TILE_SIZE)
+#         pygame.draw.rect(screen, YELLOW, (*top_left, TILE_SIZE, TILE_SIZE))
 
 
 
 
-    
+
 def adjust_grid(positions):
     all_neighbors = set()
     new_positions = set ()
@@ -119,8 +125,8 @@ def get_neighbors(pos):
 
 
 def main():
-    global iterations, re_generations, fullscreen 
-    
+    global iterations, re_generations, fullscreen
+
     running = True
     playing = False
     count = 0
@@ -129,14 +135,14 @@ def main():
     STUCK_LIMIT = 10
     stuck_count = 0
     state_history = deque(maxlen=HISTORY_LENGTH)
-    
-    
 
 
-    
+
+
+
     while running:
         clock.tick(FPS)
-        
+
         if playing:
             count += 1
 
@@ -160,13 +166,13 @@ def main():
                 state_history.clear()
                 stuck_count = 0
 
-            
+
             positions = new_positions
             pygame.display.set_caption(
         f"Conway's Game of Life  |  Gen {iterations}  |  Alive {len(positions)}  |  Press SPACE to start/stop  |  Press C to clear  |  Press G to generate random cells"
     )
 
-        
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -206,7 +212,8 @@ def main():
 
 
         screen.blit(background, (0, 0))
-        draw_grid(positions)
+
+        grid.draw(screen, positions)
         pygame.display.update()
 
 
@@ -214,12 +221,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
