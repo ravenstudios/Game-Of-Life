@@ -1,5 +1,6 @@
 import pygame
 import random
+from collections import deque
 
 pygame.init()
 
@@ -15,6 +16,7 @@ GRID_HEIGHT = HEIGHT // TILE_SIZE
 
 FPS = 60
 
+HISTORY_LENGTH = 8
 iterations = 0
 re_generations = 0
 
@@ -89,15 +91,17 @@ def get_neighbors(pos):
 
 
 def main():
-    global iterations, re_generations
+    global iterations, re_generations 
+    
     running = True
     playing = False
     count = 0
     update_freq = 10
     positions = set()
-    prev_positions = set()
     STUCK_LIMIT = 10
     stuck_count = 0
+    state_history = deque(maxlen=HISTORY_LENGTH)
+    
     
 
 
@@ -113,10 +117,11 @@ def main():
             new_positions = adjust_grid(positions)
             iterations += 1
 
-            if (new_positions == positions or new_positions == prev_positions or not new_positions):
+            state_key = frozenset(new_positions)
+            state_history.append(state_key)
+            if (state_key in list(state_history)[:-1]) or (not new_positions):
                 stuck_count += 1
-                print("Stuck for ", stuck_count, " iterations")
-            else: 
+            else:
                 stuck_count = 0
             if stuck_count >= STUCK_LIMIT:
                 print("Stuck for too long, generating new cells")
@@ -124,9 +129,10 @@ def main():
                 print("Re-generations: ", re_generations)
                 new_positions = gen(random.randrange(14, 24) * GRID_WIDTH)
                 iterations = 0
+                state_history.clear()
                 stuck_count = 0
 
-            prev_positions = positions
+            
             positions = new_positions
             pygame.display.set_caption(
         f"Conway's Game of Life  |  Gen {iterations}  |  Alive {len(positions)}  |  Press SPACE to start/stop  |  Press C to clear  |  Press G to generate random cells"
@@ -158,9 +164,13 @@ def main():
                     playing = False
                     count = 0
                     iterations = 0
+                    state_history.clear()
+                    stuck_count = 0
 
                 if event.key == pygame.K_g:
                     positions = gen(random.randrange(14, 24) * GRID_WIDTH)
+                    state_history.clear()
+                    stuck_count = 0
 
 
         screen.blit(background, (0, 0))
