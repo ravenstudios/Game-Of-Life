@@ -8,8 +8,36 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
 YELLOW = (255, 255, 0)
+DESKTOP_W, DESKTOP_H = pygame.display.get_desktop_sizes()[0]
 
-WIDTH, HEIGHT = 1200, 1200
+def switch_display(fullscreen: bool):
+
+    global screen, background, WIDTH, HEIGHT, GRID_WIDTH, GRID_HEIGHT
+
+    flags = pygame.FULLSCREEN | pygame.SCALED if fullscreen else 0
+
+    if fullscreen:
+        WIDTH, HEIGHT = DESKTOP_W, DESKTOP_H
+        flags = pygame.FULLSCREEN 
+    else:
+        WIDTH, HEIGHT = 1200, 1200
+        flags = 0
+        
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
+
+    background = pygame.Surface((WIDTH, HEIGHT))
+    background.fill(BLACK)
+    GRID_WIDTH = WIDTH // TILE_SIZE
+    GRID_HEIGHT = HEIGHT // TILE_SIZE
+
+display_info = pygame.display.Info()
+try: WIDTH, HEIGHT = display_info.current_w, display_info.current_h
+except AttributeError:
+    # Fallback to a default size if display_info is not available
+    print("Display info not available, using default size.")
+    WIDTH, HEIGHT = 1200, 1200
+
 TILE_SIZE = 5
 GRID_WIDTH = WIDTH // TILE_SIZE
 GRID_HEIGHT = HEIGHT // TILE_SIZE
@@ -25,12 +53,12 @@ pygame.display.set_caption(
     )
 
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+fullscreen = True
+switch_display(fullscreen)
 
 clock = pygame.time.Clock()
 
-background = pygame.Surface((WIDTH, HEIGHT))
-background.fill(BLACK)
+
 
 def gen (num):
     return set([(random.randrange(0, GRID_WIDTH), random.randrange(0, GRID_HEIGHT)) for _ in range(num)])
@@ -91,7 +119,7 @@ def get_neighbors(pos):
 
 
 def main():
-    global iterations, re_generations 
+    global iterations, re_generations, fullscreen 
     
     running = True
     playing = False
@@ -158,6 +186,10 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     playing = not playing
+
+                if event.key == pygame.K_F11:
+                    fullscreen = not fullscreen
+                    switch_display(fullscreen)
 
                 if event.key == pygame.K_c:
                     positions = set()
